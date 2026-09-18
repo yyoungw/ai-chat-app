@@ -1,24 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+MCP Host를 포함한 AI 채팅 MVP입니다. Gemini 스트리밍과 MCP 도구 결과를 한 화면에서 제공합니다.
+
+## 환경 변수
+
+`.env.example`을 복사해 `.env.local`을 만듭니다. **실제 키는 Git에 올리지 않습니다.**
+
+```bash
+cp .env.example .env.local
+```
+
+| 변수 | 설명 |
+|---|---|
+| `GEMINI_API_KEY` | Gemini API 키 |
+| `GEMINI_MODEL` | 사용할 모델 이름 |
+| `SUPABASE_URL` | Supabase 프로젝트 URL |
+| `SUPABASE_ANON_KEY` | 서버 전용 anon 키 |
+
+GitHub Actions / 배포용 값은 저장소 **Settings → Secrets and variables → Actions** 에 같은 이름으로 넣습니다.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
 
