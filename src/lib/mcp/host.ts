@@ -5,6 +5,7 @@ import {
   createAndConnectClient,
   type McpConnectSecrets,
 } from "@/lib/mcp/create-client";
+import { mcpReconnectBlockedReason } from "@/lib/mcp/reachability";
 import { logMcp, secretKeys } from "@/lib/mcp/log";
 import {
   getSession,
@@ -98,6 +99,11 @@ export async function connectHost(
   server: McpServerConfig,
   secrets?: McpConnectSecrets
 ): Promise<McpCatalog> {
+  const blocked = mcpReconnectBlockedReason(server);
+  if (blocked) {
+    throw createAppError("BAD_REQUEST", 400, blocked);
+  }
+
   try {
     logMcp("connect", {
       serverId: server.id,

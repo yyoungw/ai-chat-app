@@ -1,4 +1,5 @@
 import { connectHost, listHostSessions } from "@/lib/mcp/host-client";
+import { mcpReconnectBlockedReason } from "@/lib/mcp/reachability";
 import {
   loadDesiredConnections,
   saveDesiredConnections,
@@ -34,13 +35,17 @@ export async function restoreDesiredSessions(
   }
   const missing = remembered.filter((id) => !live.includes(id));
   for (const id of missing) {
-    next[id] = { status: "connecting", error: null };
+    const server = known.get(id);
+    const blocked = server ? mcpReconnectBlockedReason(server) : null;
+    next[id] = blocked
+      ? { status: "error", error: blocked }
+      : { status: "connecting", error: null };
   }
   onUpdate?.({ ...next });
 
   for (const id of missing) {
     const server = known.get(id);
-    if (!server) continue;
+    if (!server || mcpReconnectBlockedReason(server)) continue;
     try {
       await connectHost(server);
       next[id] = { status: "connected", error: null };

@@ -21,6 +21,7 @@ export type McpChatTool = {
 export function useMcpChatSession() {
   const [connected, setConnected] = useState<McpChatServer[]>([]);
   const [tools, setTools] = useState<McpChatTool[]>([]);
+  const [registeredCount, setRegisteredCount] = useState(0);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,8 @@ export function useMcpChatSession() {
         if (cancelled) return;
         const servers = (await hydrateFromRemote()).mcp.servers;
         if (cancelled) return;
+        setRegisteredCount(servers.length);
+        setReady(true);
         void restoreDesiredSessions(servers, (statuses) => {
           if (cancelled) return;
           setConnected(
@@ -37,33 +40,29 @@ export function useMcpChatSession() {
               .filter((server) => statuses[server.id]?.status === "connected")
               .map((server) => ({ id: server.id, name: server.name }))
           );
-        })
-          .then(async (statuses) => {
-            if (cancelled) return;
-            const connectedServers = servers
-              .filter((server) => statuses[server.id]?.status === "connected")
-              .map((server) => ({ id: server.id, name: server.name }));
-            setConnected(connectedServers);
-            const listed = await Promise.all(
-              connectedServers.map(async (server) => {
-                try {
-                  const next = await listTools(server.id);
-                  return next.map((tool) => ({
-                    serverId: server.id,
-                    serverName: server.name,
-                    name: tool.name,
-                    description: tool.description,
-                  }));
-                } catch {
-                  return [];
-                }
-              })
-            );
-            if (!cancelled) setTools(listed.flat());
-          })
-          .finally(() => {
-            if (!cancelled) setReady(true);
-          });
+        }).then(async (statuses) => {
+          if (cancelled) return;
+          const connectedServers = servers
+            .filter((server) => statuses[server.id]?.status === "connected")
+            .map((server) => ({ id: server.id, name: server.name }));
+          setConnected(connectedServers);
+          const listed = await Promise.all(
+            connectedServers.map(async (server) => {
+              try {
+                const next = await listTools(server.id);
+                return next.map((tool) => ({
+                  serverId: server.id,
+                  serverName: server.name,
+                  name: tool.name,
+                  description: tool.description,
+                }));
+              } catch {
+                return [];
+              }
+            })
+          );
+          if (!cancelled) setTools(listed.flat());
+        });
       })();
     }, 0);
     return () => {
@@ -77,5 +76,6 @@ export function useMcpChatSession() {
     tools,
     ready,
     connectedCount: connected.length,
+    registeredCount,
   };
 }

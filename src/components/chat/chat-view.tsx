@@ -403,7 +403,10 @@ export function ChatView() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <McpConnectionBadge count={mcp.ready ? mcp.connectedCount : null} />
+          <McpConnectionBadge
+            connectedCount={mcp.ready ? mcp.connectedCount : null}
+            registeredCount={mcp.ready ? mcp.registeredCount : null}
+          />
           <Link
             href="/mcp"
             aria-label="MCP 서버 관리"

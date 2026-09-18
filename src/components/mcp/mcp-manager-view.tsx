@@ -26,6 +26,7 @@ import {
   upsertServer,
 } from "@/lib/storage/mcp-storage";
 import { connectHost, disconnectHost } from "@/lib/mcp/host-client";
+import { mcpReconnectBlockedReason } from "@/lib/mcp/reachability";
 import { restoreDesiredSessions } from "@/lib/mcp/restore-sessions";
 import type {
   McpConnectionStatus,
@@ -61,11 +62,11 @@ export function McpManagerView() {
       setStore({ version: 1, servers: hydrated.mcp.servers });
       setSecretFlags(hydrated.mcp.secretFlags);
       setSelectedId(hydrated.mcp.servers[0]?.id ?? null);
+      setHydrated(true);
 
       void restoreDesiredSessions(hydrated.mcp.servers, (statuses) => {
         setConnections(statuses);
-        setHydrated(true);
-      }).finally(() => setHydrated(true));
+      });
     });
   }, []);
 
@@ -126,6 +127,14 @@ export function McpManagerView() {
     persistSecrets?: boolean
   ) {
     if (!selected) return;
+    const blocked = mcpReconnectBlockedReason(selected);
+    if (blocked) {
+      setConnections((prev) => ({
+        ...prev,
+        [selected.id]: { status: "error", error: blocked },
+      }));
+      return;
+    }
     const id = selected.id;
     setConnections((prev) => ({
       ...prev,
