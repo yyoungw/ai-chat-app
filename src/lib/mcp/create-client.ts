@@ -10,6 +10,7 @@ import {
 } from "@modelcontextprotocol/client/stdio";
 
 import { createAppError } from "@/lib/errors";
+import { resolveMcpConnectUrl } from "@/lib/mcp/reachability";
 import type { McpServerConfig } from "@/lib/types/mcp";
 
 export type McpConnectSecrets = {
@@ -35,10 +36,11 @@ export async function createAndConnectClient(
   });
 
   if (server.transport === "streamable-http") {
-    const url = server.url?.trim();
-    if (!url) {
+    const rawUrl = server.url?.trim();
+    if (!rawUrl) {
       throw createAppError("BAD_REQUEST", 400, "Streamable HTTP URL이 없습니다.");
     }
+    const url = resolveMcpConnectUrl(rawUrl);
 
     const headers = secrets?.headers;
     const transport = new StreamableHTTPClientTransport(new URL(url), {

@@ -5,7 +5,7 @@ import {
   createAndConnectClient,
   type McpConnectSecrets,
 } from "@/lib/mcp/create-client";
-import { mcpReconnectBlockedReason } from "@/lib/mcp/reachability";
+import { mcpReconnectBlockedReason, resolveMcpServerForConnect } from "@/lib/mcp/reachability";
 import { logMcp, secretKeys } from "@/lib/mcp/log";
 import {
   getSession,
@@ -99,21 +99,22 @@ export async function connectHost(
   server: McpServerConfig,
   secrets?: McpConnectSecrets
 ): Promise<McpCatalog> {
-  const blocked = mcpReconnectBlockedReason(server);
+  const resolved = resolveMcpServerForConnect(server);
+  const blocked = mcpReconnectBlockedReason(resolved);
   if (blocked) {
     throw createAppError("BAD_REQUEST", 400, blocked);
   }
 
   try {
     logMcp("connect", {
-      serverId: server.id,
-      transport: server.transport,
-      url: server.url,
-      command: server.command,
+      serverId: resolved.id,
+      transport: resolved.transport,
+      url: resolved.url,
+      command: resolved.command,
       headerKeys: secretKeys(secrets?.headers),
       envKeys: secretKeys(secrets?.env),
     });
-    const client = await createAndConnectClient(server, secrets);
+    const client = await createAndConnectClient(resolved, secrets);
     await setSession({ server, client });
     return {
       tools: await listTools(server.id),

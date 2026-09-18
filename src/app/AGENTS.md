@@ -22,7 +22,7 @@ Next.js App Router 영역. 페이지 UI 셸과 서버 Route Handler(채팅 SSE, 
 SSE 응답:
 
 - `token` / `mcp` / `done` / `error` 이벤트
-- MCP 프록시는 `/api/mcp-host/**` (원격 서버의 `/api/mcp`와 경로가 겹치지 않게 분리)
+- MCP 프록시는 `/api/mcp-host/**` (이 앱의 `/api/mcp` 서버와 경로가 겹치지 않게 분리)
 - 클라이언트 AbortController와 연동해 중단 가능해야 함
 - 상태코드 에러는 통일된 에러 페이로드로 변환 후 전달
 
